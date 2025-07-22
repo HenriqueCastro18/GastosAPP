@@ -1,0 +1,472 @@
+# Define o gerenciador de telas principal do aplicativo
+<Gerenciador>:
+    # Define a tela 'Menu' e a associa ao nome 'menu'
+    Menu:
+        name:'menu'
+    # Define a tela 'Gastos' e a associa ao nome 'gastos'
+    Gastos:
+        name:'gastos'
+    # Define a tela 'AdicionarGastoScreen' e a associa ao nome 'adicionar_gasto'
+    AdicionarGastoScreen: # Mantenha esta linha
+        name:'adicionar_gasto'
+
+# Define o layout e os elementos da tela do menu principal
+<Menu>:
+    # O widget principal da tela, organiza seus filhos verticalmente
+    BoxLayout:
+        orientation:'vertical'
+        padding: dp(40) # Espaçamento interno em todos os lados (40 density-independent pixels)
+        spacing: dp(30) # Espaçamento entre os widgets filhos (30 density-independent pixels)
+        
+        # Desenha a cor de fundo para este BoxLayout
+        canvas:
+            Color:
+                rgba:0.1,0.1,0.1,1 # Cor de fundo: cinza muito escuro (quase preto) com opacidade total
+            Rectangle:
+                size: self.size   # Ocupa todo o tamanho do BoxLayout
+                pos: self.pos     # Posiciona no canto superior esquerdo do BoxLayout
+
+        # Rótulo para exibir o nome da conta ativa
+        Label:
+            text: root.conta_nome # Vincula o texto à propriedade 'conta_nome' da classe Python da tela Menu
+            font_size: '20sp'     # Tamanho da fonte em scale-independent pixels
+            color: 1, 1, 1, 1     # Cor do texto: branco
+            bold: True            # Texto em negrito
+            size_hint_y: None     # Desabilita o redimensionamento vertical automático
+            height: dp(140)       # Altura fixa do rótulo
+
+        # Espaçador flexível que ocupa o espaço restante verticalmente
+        Widget:
+            size_hint_y: 1 # Espaçador flexível
+
+        # NOVO: BoxLayout para centralizar o GridLayout dos botões horizontalmente
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: None             # Desabilita o redimensionamento vertical
+            height: self.minimum_height   # Altura mínima baseada no conteúdo dos botões
+            
+            Widget: # Espaçador à esquerda para empurrar o GridLayout para o centro
+                size_hint_x: 1
+
+            # GridLayout para organizar os botões em uma grade 2x2
+            GridLayout:
+                cols: 2                     # Duas colunas
+                rows: 2                     # Duas linhas
+                spacing: dp(30)             # Espaçamento entre os botões
+                size_hint_y: None           # Desabilita o redimensionamento vertical
+                height: self.minimum_height # Altura mínima baseada no conteúdo
+                size_hint_x: None           # Desabilita o redimensionamento horizontal
+                width: dp(250)              # Largura fixa do GridLayout
+                                            # Ajuste este valor conforme a necessidade para caber os botões
+                
+                # Os botões dentro do GridLayout não precisam de size_hint_x: None se o GridLayout tiver largura definida
+                # Botão "Adicionar Gasto"
+                Botao:
+                    text:'Adicionar Gasto'
+                    on_release:app.root.current = 'adicionar_gasto' # Muda para a tela 'adicionar_gasto' ao ser clicado
+                    cor:0.1,0.7,0.1,1 # Cor principal do botão (verde)
+                    cor2:0.05,0.35,0.05,1 # Cor secundária (para efeito de clique)
+                    size:(dp(120), dp(40)) # Tamanho fixo do botão
+
+                # Botão "Consultar Gastos"
+                Botao:
+                    text:'Consultar Gastos'
+                    on_release:app.root.current = 'gastos' # Muda para a tela 'gastos' ao ser clicado
+                    cor:0.1,0.5,0.7,1 # Cor principal do botão (azul claro)
+                    cor2:0.05,0.25,0.35,1 # Cor secundária
+                    size:(dp(120), dp(40))
+
+                # Botão "Criar Conta"
+                Botao:
+                    text:'Criar Conta'
+                    cor:0.5,0.1,0.7,1 # Cor principal do botão (roxo)
+                    cor2:0.25,0.05,0.35,1 # Cor secundária
+                    on_release: app.root.get_screen('menu').criar_conta() # Chama o método 'criar_conta' da tela Menu
+                    size:(dp(120), dp(40))
+
+                # Botão "Trocar Conta"
+                Botao:
+                    text:'Trocar Conta'
+                    cor:0.7,0.7,0.1,1 # Cor principal do botão (amarelo/laranja)
+                    cor2:0.35,0.35,0.05,1 # Cor secundária
+                    on_release: app.root.get_screen('menu').trocar_conta() # Chama o método 'trocar_conta' da tela Menu
+                    size:(dp(120), dp(40))
+
+            Widget: # Espaçador à direita para balancear a centralização
+                size_hint_x: 1
+
+        # Botão "Sair" - Mantido fora do GridLayout para controle de posicionamento individual
+        Botao:
+            text:'Sair'
+            on_release:root.confirmacao() # Chama o método 'confirmacao' da tela Menu para sair
+            cor:0.4,0.4,0.4,1 # Cor principal do botão (cinza)
+            cor2:0.2,0.2,0.2,1 # Cor secundária
+            size:(dp(120), dp(40)) # Tamanho fixo do botão
+            pos_hint: {'center_x': 0.5} # Centraliza o botão horizontalmente
+
+        # Espaçador na parte inferior para controlar o layout
+        Widget:
+            size_hint_y: None
+            height: dp(50) # Usando dp para altura
+
+# Define o layout para uma linha da tabela de gastos
+<GastoTableRow@BoxLayout>:
+    orientation: 'horizontal' # Organiza os elementos da linha horizontalmente
+    size_hint_y: None         # Desabilita o redimensionamento vertical
+    height: dp(40)            # Altura fixa da linha
+    spacing: dp(5)            # Espaçamento entre os elementos da linha
+    padding: dp(5)            # Espaçamento interno
+    
+    # Desenha a cor de fundo para cada linha da tabela
+    canvas.before:
+        Color:
+            rgba: self.background_color # A cor é vinculada à propriedade 'background_color' da própria linha
+        Rectangle:
+            size: self.size           # Ocupa todo o tamanho da linha
+            pos: self.pos             # Posiciona no canto superior esquerdo da linha
+
+# Define o layout e os elementos da tela de consulta de gastos
+<Gastos>:
+    name: 'gastos' # Nome da tela para referência no ScreenManager
+    BoxLayout:
+        orientation: 'vertical'
+        padding: (dp(10), dp(6), dp(10), 0) # Padding customizado: (esquerda, topo, direita, baixo)
+        spacing: dp(0)                     # Sem espaçamento entre os widgets filhos
+
+        # Desenha a cor de fundo para este BoxLayout
+        canvas.before:
+            Color:
+                rgba: 0.1, 0.1, 0.1, 1 # Cor de fundo padrão: cinza muito escuro
+            Rectangle:
+                size: self.size      # Ocupa todo o tamanho do BoxLayout
+                pos: self.pos        # Posiciona no canto superior esquerdo do BoxLayout
+
+        # Barra de ação no topo da tela
+        ActionBar:
+            ActionView:
+                ActionPrevious:
+                    title:'Consultar Gastos' # Título exibido na barra
+                    on_release:app.root.current = 'menu' # Retorna à tela 'menu'
+                ActionButton:
+                    text:'Sair'              # Botão "Sair" na barra de ação
+                    on_release:root.confirmacao() # Chama o método de confirmação de saída
+
+        # Espaçador entre a ActionBar e o cabeçalho da tabela
+        Widget:
+            size_hint_y: None
+            height: dp(10)
+
+        # GridLayout para os cabeçalhos da tabela (Valor, Data, Descrição, Parcelas)
+        GridLayout:
+            cols: 4                  # Quatro colunas
+            size_hint_y: None        # Desabilita o redimensionamento vertical
+            height: dp(30)           # Altura fixa do cabeçalho
+            size_hint_x: None        # Desabilita o redimensionamento horizontal
+            width: root.width - dp(30) # Largura ajustada para simular margens laterais (padding já incluído)
+            pos_hint: {"center_x": 0.5} # Centraliza o GridLayout horizontalmente
+            spacing: dp(40)          # Espaçamento entre os elementos do grid
+
+            # Desenha a cor de fundo para o cabeçalho da tabela
+            canvas.before:
+                Color:
+                    rgba: 0.3, 0.3, 0.3, 1 # Cor de fundo: cinza médio
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+
+            # Rótulos para os títulos das colunas
+            Label:
+                text: 'Valor'
+                color: 1,1,1,1
+                bold: True
+                halign: 'center'
+                valign: 'middle'
+                text_size: self.width, None # Permite que o texto quebre a linha
+                size_hint_x: 0.25 # Define a proporção da largura em relação ao GridLayout pai
+                font_size:'12sp'
+            Label:
+                text: 'Data'
+                color: 1,1,1,1
+                bold: True
+                halign: 'center'
+                valign: 'middle'
+                text_size: self.width, None
+                size_hint_x: 0.2
+                font_size:'12sp'
+            Label:
+                text: 'Descrição'
+                color: 1,1,1,1
+                bold: True
+                halign: 'center'
+                valign: 'middle'
+                text_size: self.width, None
+                size_hint_x: 0.35
+                font_size:'12sp'
+            Label:
+                text: 'Parcelas'
+                color: 1,1,1,1
+                bold: True
+                halign: 'center'
+                valign: 'middle'
+                text_size: self.width, None
+                size_hint_x: 0.35
+                font_size:'12sp'
+
+        # Espaçador entre o cabeçalho e o conteúdo da tabela
+        Widget: # Spacer adicionado anteriormente
+            size_hint_y: None
+            height: dp(5)
+
+        # ScrollView para permitir rolagem se a lista de gastos for muito longa
+        ScrollView:
+            # BoxLayout para o conteúdo real da tabela (linhas de gastos)
+            BoxLayout:
+                id: table_content # ID para acesso via Python para adicionar/remover linhas
+                orientation: 'vertical'
+                size_hint_y: None
+                height: self.minimum_height # Altura baseada na soma das alturas de suas linhas filhas
+                spacing: dp(5)
+                padding: dp(5)
+
+        # BoxLayout para exibir o total de gastos
+        BoxLayout:
+            size_hint_y: None
+            height: self.minimum_height
+            padding: dp(10)
+            Label:
+                id: total_gastos_label # ID para atualizar o texto do total via Python
+                text: ''               # Texto inicial vazio
+                font_size: dp(20)
+                color: 0,1,0,1         # Cor do texto: verde
+                halign: 'center'
+                valign: 'middle'
+                size_hint_y: None
+                height: self.texture_size[1] + dp(10) # Altura ajustada ao conteúdo do texto
+                text_size: self.width, None
+
+        # Wrapper BoxLayout para centralizar os botões de ação na parte inferior
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: None
+            height: dp(80)
+            padding: dp(10)
+            spacing: dp(20)
+
+            Widget: # Espaçador à esquerda para centralização
+                size_hint_x: 1
+
+            # BoxLayout para os botões "Remover Gasto" e "Editar Gasto"
+            BoxLayout:
+                size_hint_x: None # Desabilita o redimensionamento horizontal
+                width: dp(195)    # Largura fixa para acomodar os dois botões e o espaçamento
+                orientation: 'horizontal'
+                spacing: dp(20)
+                Button: # Botão "Remover Gasto"
+                    text: 'Remover Gasto'
+                    size_hint_x: None # Adicionado para controlar a largura individualmente
+                    size_hint_y: None # Adicionado para controlar a altura individualmente
+                    width: dp(90) # Largura fixa para o botão
+                    height: dp(40) # Altura fixa para o botão
+                    background_normal: '' # Remove o fundo padrão
+                    background_color: 0.8, 0.2, 0.2, 1 # Cor de fundo: vermelho
+                    color: 1,1,1,1    # Cor do texto: branco
+                    on_release: root.remover_gasto_action() # Chama o método para remover gasto
+                    font_size:'12sp'
+                Button: # Botão "Editar Gasto"
+                    text: 'Editar Gasto'
+                    size_hint_x: None # Adicionado para controlar a largura individualmente
+                    size_hint_y: None # Adicionado para controlar a altura individualmente
+                    width: dp(90) # Largura fixa para o botão
+                    height: dp(40) # Altura fixa para o botão
+                    background_normal: ''
+                    background_color: 0.2, 0.6, 0.86, 1 # Cor de fundo: azul
+                    color: 1,1,1,1
+                    on_release: root.editar_gasto_action() # Chama o método para editar gasto
+                    font_size:'12sp'
+
+            Widget: # Espaçador à direita para balancear a centralização
+                size_hint_x: 1
+
+# Define o layout e os elementos de um item de gasto individual (pode ser removido se não for mais usado diretamente)
+# Esta classe Gasto não é mais usada para popular a tabela, mas pode ser útil para outros fins.
+# Se não for utilizada, pode ser removida.
+<Gasto>:
+    size_hint_y:None
+    height:dp(200)
+    Label:
+        id:label
+        font_size:dp(30)
+        color:0,1,0,1
+        bold: True
+    Button:
+        text:'X'
+        size_hint_x:None
+        width:dp(60)
+        on_release: app.root.get_screen('gastos').ids.box.remove_widget(root)
+
+# Define o layout e os elementos da tela de adicionar novo gasto
+<AdicionarGastoScreen>:
+    id: add_gasto_screen # ID para referência a esta tela (ex: para acessar propriedades de seu Python)
+    
+    # O BoxLayout é o primeiro e único widget filho direto da tela, também com 4 espaços
+    BoxLayout:
+        # Desenha a cor de fundo para este BoxLayout (que é o conteúdo principal da tela)
+        canvas:
+            Color:
+                rgba:0.1,0.1,0.1,1 # Cor de fundo padrão: cinza muito escuro
+            Rectangle:
+                size: self.size   # Ocupa todo o tamanho do BoxLayout
+                pos: self.pos     # Posiciona no canto superior esquerdo do BoxLayout
+        orientation: 'vertical'
+        padding: dp(40), dp(100), dp(40), dp(40) # Padding customizado: (esquerda, topo, direita, baixo)
+        spacing: dp(15)         # Espaçamento entre os widgets
+
+        # Rótulo para o campo de VALOR
+        Label:
+            text: "VALOR"
+            size_hint_y: None
+            height: dp(15)
+            padding: dp(120), 0, 0, 0 # Padding à esquerda para alinhar o texto
+            halign: 'left'            # Alinhamento horizontal à esquerda
+            valign: 'middle'          # Alinhamento vertical ao meio
+            color: 1, 1, 1, 1         # Cor do texto: branco
+            text_size: self.size      # Permite que o texto se ajuste ao tamanho disponível
+        # Campo de entrada de texto para VALOR
+        TextInput:
+            id: valor_input           # ID para acesso via Python
+            multiline: False          # Apenas uma linha de texto
+            input_type: 'number'      # Sugere teclado numérico em dispositivos móveis
+            size_hint_y: None
+            height: dp(40)
+            background_color: 0.15, 0.15, 0.15, 1 # Cor de fundo do campo
+            foreground_color: 1, 1, 1, 1         # Cor do texto digitado
+            cursor_color: 0, 1, 0, 1             # Cor do cursor
+            font_size: dp(20)
+            padding: dp(10)
+
+        # Rótulo para o campo de DATA
+        Label:
+            text: "DATA"
+            size_hint_y: None
+            height: dp(15)
+            padding: dp(120), 0, 0, 0
+            halign: 'left'
+            valign: 'middle'
+            color: 1, 1, 1, 1
+            text_size: self.size
+        # Campo de entrada de texto para DATA
+        TextInput:
+            id: data_input
+            multiline: False
+            size_hint_y: None
+            height: dp(40)
+            background_color: 0.15, 0.15, 0.15, 1
+            foreground_color: 1, 1, 1, 1
+            cursor_color: 0, 1, 0, 1
+            font_size: dp(20)
+            padding: dp(10)
+
+        # Rótulo para o campo de DESCRIÇÃO
+        Label:
+            text: "DESCRIÇÃO"
+            size_hint_y: None
+            height: dp(15)
+            padding: dp(100), 0, 0, 0
+            halign: 'left'
+            valign: 'middle'
+            color: 1, 1, 1, 1
+            text_size: self.size
+        # Campo de entrada de texto para DESCRIÇÃO
+        TextInput:
+            id: descricao_input
+            multiline: False
+            size_hint_y: None
+            height: dp(40)
+            background_color: 0.15, 0.15, 0.15, 1
+            foreground_color: 1, 1, 1, 1
+            cursor_color: 0, 1, 0, 1
+            font_size: dp(20)
+            padding: dp(10)
+
+        # BoxLayout para o CheckBox e Label de "Parcelas"
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: None
+            height: dp(40)
+            padding: 0, 0, dp(50), 0 # Ajustado para posicionar o spinner
+            spacing: dp(10)
+            # CheckBox para indicar se o gasto é parcelado
+            CheckBox:
+                id: parcelado_checkbox
+                active: add_gasto_screen.is_parcelado # Vincula o estado do checkbox a uma propriedade da tela Python
+                on_active: add_gasto_screen.toggle_parcelas_input(self, self.active) # Chama método ao mudar estado
+                size_hint_x: None
+                width: dp(40)
+            # Rótulo associado ao CheckBox "Parcelas"
+            Label:
+                text: "Parcelas" # Este Label é para o checkbox
+                size_hint_x: None
+                width: dp(150)
+                halign: 'left'
+                valign: 'middle'
+                color: 1, 1, 1, 1
+                text_size: self.size
+            Widget: # Espaçador para empurrar o checkbox e label para a esquerda
+                size_hint_x: 1
+            
+            # Spinner (dropdown) para selecionar a quantidade de parcelas
+            Spinner:
+                id: qtd_parcelas_spinner # ID para acesso via Python
+                text: '1'                # Valor inicial exibido
+                values: [str(i) for i in range(1, 99)] # Opções de 1 a 98 parcelas (ajustado de 24 para 99 para mais opções)
+                size_hint_y: None
+                height: dp(40)
+                size_hint_x: None
+                width: dp(60)            # Largura fixa
+                background_normal: ''
+                background_color: 0.15, 0.15, 0.15, 1
+                color: 1, 1, 1, 1
+                font_size: dp(20)
+                opacity: 1 if add_gasto_screen.is_parcelado else 0 # Visibilidade controlada pela propriedade 'is_parcelado'
+                disabled: not add_gasto_screen.is_parcelado # Habilita/desabilita baseado na propriedade 'is_parcelado'
+
+        # Espaçador flexível para empurrar os botões "Salvar" e "Cancelar" para a parte inferior
+        Widget:
+            size_hint_y: 1
+
+        # BoxLayout para centralizar os botões de ação na parte inferior
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: None
+            height: dp(60)
+            spacing: dp(20)
+            padding: dp(10)
+            pos_hint: {"center_x": 0.5}
+
+            Widget: # Espaçador à esquerda
+                size_hint_x: 1
+
+            # Botão "Salvar"
+            Botao:
+                text: "Salvar"
+                on_release: root.salvar_gasto() # Chama o método para salvar o gasto
+                cor: 0.1, 0.7, 0.1, 1
+                cor2: 0.05, 0.35, 0.05, 1
+                size_hint_x: None # Adicionado para controlar a largura individualmente
+                size_hint_y: None # Adicionado para controlar a altura individualmente
+                width: dp(90) # Largura fixa para o botão
+                height: dp(40) # Altura fixa para o botão
+
+            # Botão "Cancelar"
+            Botao:
+                text: "Cancelar"
+                on_release: root.cancelar_gasto() # Chama o método para cancelar a operação
+                cor: 0.7, 0.1, 0.1, 1
+                cor2: 0.35, 0.05, 0.05, 1
+                size_hint_x: None # Adicionado para controlar a largura individualmente
+                size_hint_y: None # Adicionado para controlar a altura individualmente
+                width: dp(90) # Largura fixa para o botão
+                height: dp(40) # Altura fixa para o botão
+
+            Widget: # Espaçador à direita
+                size_hint_x: 1

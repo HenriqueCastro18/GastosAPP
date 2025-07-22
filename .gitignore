@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# Kivy / Buildozer specific
+*.kv.py # Kivy compiled files (if any)
+*.log
+.buildozer/ # Buildozer's temporary build directory
+bin/*.apk # Though you want to include one, this prevents future auto-generated ones from being committed
+bin/*.aab
+bin/*.ipa
+dist/ # Buildozer's distribution directory
+# Optionally, if you don't want to track your local databases
+contas/*.db
+!contas/GastosTotais.db # If you decide to include GastosTotais.db, uncomment this line.
